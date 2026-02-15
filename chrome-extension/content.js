@@ -1,4 +1,4 @@
-// JobFill AI - Content Script (Stealth Mode with Dropdown Support)
+// JobFill AI - Content Script (Stealth Mode with Full Form Support)
 (function() {
   'use strict';
   
@@ -17,24 +17,12 @@
       return;
     }
     
-    // Configure delays based on typing speed setting
     let minDelay, maxDelay;
     switch (settings.typing_speed) {
-      case 'fast':
-        minDelay = 30;
-        maxDelay = 80;
-        break;
-      case 'human':
-        minDelay = settings.typing_delay_min || 50;
-        maxDelay = settings.typing_delay_max || 150;
-        break;
-      case 'slow':
-        minDelay = 100;
-        maxDelay = 300;
-        break;
-      default:
-        minDelay = 50;
-        maxDelay = 150;
+      case 'fast': minDelay = 30; maxDelay = 80; break;
+      case 'human': minDelay = settings.typing_delay_min || 50; maxDelay = settings.typing_delay_max || 150; break;
+      case 'slow': minDelay = 100; maxDelay = 300; break;
+      default: minDelay = 50; maxDelay = 150;
     }
     
     let index = 0;
@@ -65,29 +53,17 @@
     setTimeout(typeChar, 100 + Math.random() * 200);
   }
   
-  // Simulate mouse movement to element
+  // Simulate mouse movement
   function simulateMouseMove(element) {
     const rect = element.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const offsetX = (Math.random() - 0.5) * (rect.width * 0.3);
-    const offsetY = (Math.random() - 0.5) * (rect.height * 0.3);
+    const centerX = rect.left + rect.width / 2 + (Math.random() - 0.5) * (rect.width * 0.3);
+    const centerY = rect.top + rect.height / 2 + (Math.random() - 0.5) * (rect.height * 0.3);
     
-    const moveEvent = new MouseEvent('mousemove', {
-      clientX: centerX + offsetX,
-      clientY: centerY + offsetY,
-      bubbles: true,
-      cancelable: true
-    });
-    element.dispatchEvent(moveEvent);
-    element.dispatchEvent(new MouseEvent('mouseenter', {
-      clientX: centerX + offsetX,
-      clientY: centerY + offsetY,
-      bubbles: true
-    }));
+    element.dispatchEvent(new MouseEvent('mousemove', { clientX: centerX, clientY: centerY, bubbles: true }));
+    element.dispatchEvent(new MouseEvent('mouseenter', { clientX: centerX, clientY: centerY, bubbles: true }));
   }
   
-  // Smart click on element
+  // Smart click
   function smartClick(element) {
     simulateMouseMove(element);
     element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
@@ -98,11 +74,10 @@
   // Handle SELECT dropdowns
   async function handleSelectDropdown(selectEl, valueToSelect) {
     return new Promise(async (resolve) => {
-      // Find matching option
       const options = Array.from(selectEl.options);
       let matchedOption = null;
       
-      // Try exact match first
+      // Try exact match
       matchedOption = options.find(opt => 
         opt.value.toLowerCase() === valueToSelect.toLowerCase() ||
         opt.text.toLowerCase() === valueToSelect.toLowerCase()
@@ -119,15 +94,11 @@
       }
       
       if (matchedOption) {
-        // Click to open dropdown
         smartClick(selectEl);
         await new Promise(r => setTimeout(r, 100 + Math.random() * 150));
-        
-        // Set value
         selectEl.value = matchedOption.value;
         selectEl.dispatchEvent(new Event('change', { bubbles: true }));
         selectEl.dispatchEvent(new Event('input', { bubbles: true }));
-        
         resolve(true);
       } else {
         resolve(false);
@@ -135,74 +106,147 @@
     });
   }
   
-  // Handle custom dropdown components (React Select, etc.)
-  async function handleCustomDropdown(container, valueToSelect, label) {
+  // Handle radio buttons (Yes/No, Gender, etc.)
+  async function handleRadioButton(container, valueToSelect, fieldContext) {
     return new Promise(async (resolve) => {
-      try {
-        // Find clickable trigger
-        const trigger = container.querySelector('[class*="control"], [class*="trigger"], [role="combobox"], [role="listbox"], button, [class*="select"]');
+      // Find all radio buttons in the container or nearby
+      const radios = container.querySelectorAll('input[type="radio"]');
+      
+      for (const radio of radios) {
+        const label = getRadioLabel(radio);
+        const value = radio.value.toLowerCase();
+        const labelText = label.toLowerCase();
         
-        if (trigger) {
-          // Click to open
-          smartClick(trigger);
-          await new Promise(r => setTimeout(r, 200 + Math.random() * 200));
+        // Check for match
+        if (value === valueToSelect.toLowerCase() || 
+            labelText.includes(valueToSelect.toLowerCase()) ||
+            valueToSelect.toLowerCase().includes(labelText)) {
           
-          // Find options
-          const optionsContainer = document.querySelector('[class*="menu"], [class*="options"], [class*="dropdown"], [role="listbox"]');
+          await new Promise(r => setTimeout(r, 100 + Math.random() * 200));
+          simulateMouseMove(radio);
+          await new Promise(r => setTimeout(r, 50));
           
-          if (optionsContainer) {
-            const options = optionsContainer.querySelectorAll('[class*="option"], [role="option"], li, div[data-value]');
-            
-            for (const opt of options) {
-              const text = opt.textContent.toLowerCase();
-              if (text.includes(valueToSelect.toLowerCase()) || valueToSelect.toLowerCase().includes(text)) {
-                smartClick(opt);
-                await new Promise(r => setTimeout(r, 100));
-                resolve(true);
-                return;
-              }
-            }
-          }
+          radio.checked = true;
+          radio.dispatchEvent(new Event('change', { bubbles: true }));
+          radio.dispatchEvent(new Event('click', { bubbles: true }));
+          
+          // Also click the label if it exists
+          const labelEl = document.querySelector(`label[for="${radio.id}"]`);
+          if (labelEl) smartClick(labelEl);
+          
+          resolve(true);
+          return;
         }
-        resolve(false);
-      } catch (e) {
-        resolve(false);
       }
+      resolve(false);
     });
   }
   
-  // Field detection patterns (comprehensive)
+  // Get radio button label
+  function getRadioLabel(radio) {
+    // Check for label with for attribute
+    if (radio.id) {
+      const label = document.querySelector(`label[for="${radio.id}"]`);
+      if (label) return label.textContent.trim();
+    }
+    
+    // Check parent for label
+    let parent = radio.parentElement;
+    for (let i = 0; i < 3 && parent; i++) {
+      const label = parent.querySelector('label, span, div');
+      if (label && label !== radio) {
+        const text = label.textContent.trim();
+        if (text && text.length < 100) return text;
+      }
+      parent = parent.parentElement;
+    }
+    
+    return radio.value || '';
+  }
+  
+  // Handle custom dropdown with search (like location autocomplete)
+  async function handleAutocompleteDropdown(input, valueToSelect) {
+    return new Promise(async (resolve) => {
+      // Type the value
+      await new Promise(res => humanType(input, valueToSelect, res));
+      
+      // Wait for dropdown to appear
+      await new Promise(r => setTimeout(r, 500 + Math.random() * 300));
+      
+      // Look for dropdown options
+      const dropdownSelectors = [
+        '[class*="autocomplete"]',
+        '[class*="suggestions"]',
+        '[class*="dropdown"]',
+        '[class*="listbox"]',
+        '[role="listbox"]',
+        '[class*="options"]',
+        '[class*="menu"]',
+        'ul[class*="list"]'
+      ];
+      
+      for (const selector of dropdownSelectors) {
+        const dropdown = document.querySelector(selector);
+        if (dropdown && dropdown.offsetHeight > 0) {
+          const options = dropdown.querySelectorAll('li, [role="option"], [class*="option"], div[data-value]');
+          
+          for (const opt of options) {
+            const text = opt.textContent.toLowerCase();
+            if (text.includes(valueToSelect.toLowerCase()) || valueToSelect.toLowerCase().includes(text.split(',')[0])) {
+              await new Promise(r => setTimeout(r, 200 + Math.random() * 200));
+              smartClick(opt);
+              resolve(true);
+              return;
+            }
+          }
+          
+          // If no exact match, click the first option
+          if (options.length > 0) {
+            await new Promise(r => setTimeout(r, 200));
+            smartClick(options[0]);
+            resolve(true);
+            return;
+          }
+        }
+      }
+      
+      // Press Enter to select first option
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13, bubbles: true }));
+      resolve(true);
+    });
+  }
+  
+  // Field detection patterns
   const fieldPatterns = {
     firstName: /first[_-]?name|fname|given[_-]?name|first$/i,
     lastName: /last[_-]?name|lname|surname|family[_-]?name|last$/i,
-    fullName: /full[_-]?name|^name$|applicant[_-]?name|your[_-]?name|legal[_-]?name/i,
+    fullName: /full[_-]?name|^name$|applicant[_-]?name|your[_-]?name|legal[_-]?name|complete[_-]?name/i,
     email: /e?-?mail|email[_-]?address|^email$/i,
     phone: /phone|tel|mobile|cell|contact[_-]?number/i,
     linkedin: /linkedin|linked[_-]?in|profile[_-]?url/i,
-    // Address patterns
     streetAddress: /street[_-]?address|address[_-]?line|address1|street|home[_-]?address/i,
-    addressLine2: /address[_-]?line[_-]?2|address2|apt|suite|unit/i,
     city: /^city$|city[_-]?name|town|municipality/i,
     state: /^state$|state[_-]?province|region|province/i,
     zipCode: /zip|postal|postcode|zip[_-]?code|postal[_-]?code/i,
     country: /country|nation|country[_-]?name/i,
-    location: /location|current[_-]?location/i,
-    // Other
+    location: /location|current[_-]?location|city.*state|where.*located/i,
     website: /website|portfolio|personal[_-]?website|url|github/i,
-    company: /current[_-]?company|employer|company[_-]?name/i,
-    title: /job[_-]?title|current[_-]?title|position|role/i,
-    salary: /salary|compensation|pay|expected[_-]?salary/i,
-    experience: /years[_-]?of[_-]?experience|experience[_-]?years|yoe/i,
-    startDate: /start[_-]?date|available|availability|when[_-]?can/i,
-    workAuth: /work[_-]?auth|authorized|legally|visa|sponsorship/i,
+    // Current job
+    currentCompany: /current[_-]?company|employer|company[_-]?name|most[_-]?recent[_-]?company|present[_-]?company/i,
+    currentTitle: /current[_-]?title|job[_-]?title|position|role|most[_-]?recent[_-]?title/i,
+    // Yes/No questions
+    workAuth: /work[_-]?auth|authorized|legally|eligible.*work|right.*work/i,
+    visaSponsorship: /visa|sponsorship|sponsor|immigration/i,
+    textConsent: /text[_-]?message|sms|consent.*text|opt.*in/i,
+    // Demographics
     gender: /gender|sex/i,
-    veteran: /veteran|military/i,
+    veteran: /veteran|military|armed[_-]?forces/i,
     disability: /disability|disabled|accommodation/i,
-    race: /race|ethnicity/i
+    race: /race|ethnicity|ethnic/i
   };
   
   // Get field value based on pattern matching
-  function getFieldValue(field) {
+  function getFieldValue(field, fieldType = 'text') {
     const name = (field.name || field.id || '').toLowerCase();
     const placeholder = (field.placeholder || '').toLowerCase();
     const ariaLabel = (field.getAttribute('aria-label') || '').toLowerCase();
@@ -214,6 +258,9 @@
     const pi = profile.personal_info;
     
     // Name fields
+    if (fieldPatterns.fullName.test(combined)) {
+      return pi.full_name || '';
+    }
     if (fieldPatterns.firstName.test(combined)) {
       return pi.full_name?.split(' ')[0] || '';
     }
@@ -221,11 +268,8 @@
       const parts = pi.full_name?.split(' ') || [];
       return parts.slice(1).join(' ') || '';
     }
-    if (fieldPatterns.fullName.test(combined)) {
-      return pi.full_name || '';
-    }
     
-    // Contact fields
+    // Contact
     if (fieldPatterns.email.test(combined)) {
       return pi.email || '';
     }
@@ -239,7 +283,7 @@
       return pi.website || pi.github || pi.portfolio || '';
     }
     
-    // Address fields - smart matching
+    // Address
     if (fieldPatterns.streetAddress.test(combined)) {
       return pi.street_address || '';
     }
@@ -247,15 +291,10 @@
       return pi.city || '';
     }
     if (fieldPatterns.state.test(combined)) {
-      // Check if it's a dropdown (likely needs full name) or text input (might need abbreviation)
-      if (field.tagName === 'SELECT') {
+      if (field.tagName === 'SELECT' || field.maxLength > 3) {
         return pi.state_full || pi.state || '';
       }
-      // For short text inputs, use abbreviation
-      if (field.maxLength && field.maxLength <= 3) {
-        return pi.state || '';
-      }
-      return pi.state_full || pi.state || '';
+      return pi.state || '';
     }
     if (fieldPatterns.zipCode.test(combined)) {
       return pi.zip_code || '';
@@ -267,12 +306,66 @@
       return pi.country || pi.country_code || 'United States';
     }
     if (fieldPatterns.location.test(combined)) {
-      return pi.location || `${pi.city}, ${pi.state}`;
+      return `${pi.city}, ${pi.state}` || pi.location || '';
     }
     
-    // Work authorization - usually "Yes"
-    if (fieldPatterns.workAuth.test(combined)) {
-      return 'Yes';
+    // Current job
+    if (fieldPatterns.currentCompany.test(combined)) {
+      const exp = profile.work_experience?.[0];
+      return exp?.company || '';
+    }
+    if (fieldPatterns.currentTitle.test(combined)) {
+      const exp = profile.work_experience?.[0];
+      return exp?.title || '';
+    }
+    
+    return null;
+  }
+  
+  // Get Yes/No value for specific question types
+  function getYesNoValue(fieldContext) {
+    const context = fieldContext.toLowerCase();
+    
+    // Work authorization - Yes
+    if (fieldPatterns.workAuth.test(context)) {
+      return 'yes';
+    }
+    
+    // Visa sponsorship - No (assuming authorized to work)
+    if (fieldPatterns.visaSponsorship.test(context)) {
+      return 'no';
+    }
+    
+    // Text consent - user preference (default No for privacy)
+    if (fieldPatterns.textConsent.test(context)) {
+      return 'no'; // Can be changed in settings later
+    }
+    
+    return null;
+  }
+  
+  // Get demographic value
+  function getDemographicValue(fieldContext) {
+    const context = fieldContext.toLowerCase();
+    
+    // Gender - Decline to self-identify by default
+    if (fieldPatterns.gender.test(context)) {
+      return 'decline';
+    }
+    
+    // Veteran - No (can be changed)
+    if (fieldPatterns.veteran.test(context)) {
+      return 'no';
+    }
+    
+    // Disability - Decline
+    if (fieldPatterns.disability.test(context)) {
+      return 'decline';
+    }
+    
+    // Race/Ethnicity - Decline
+    if (fieldPatterns.race.test(context)) {
+      return 'decline';
     }
     
     return null;
@@ -291,9 +384,10 @@
       if (labelEl) return labelEl.textContent.trim();
     }
     
+    // Check parent elements
     let parent = field.parentElement;
     for (let i = 0; i < 5 && parent; i++) {
-      const labelEl = parent.querySelector('label');
+      const labelEl = parent.querySelector('label, legend, [class*="label"]');
       if (labelEl && !labelEl.querySelector('input, textarea, select')) {
         return labelEl.textContent.trim();
       }
@@ -303,7 +397,25 @@
     return '';
   }
   
-  // Find all fillable fields
+  // Get context around a field group (for radio buttons)
+  function getFieldGroupContext(element) {
+    let parent = element.parentElement;
+    let context = '';
+    
+    for (let i = 0; i < 6 && parent; i++) {
+      const legend = parent.querySelector('legend');
+      if (legend) context += ' ' + legend.textContent;
+      
+      const heading = parent.querySelector('h1, h2, h3, h4, h5, h6, [class*="label"], [class*="title"], [class*="question"]');
+      if (heading) context += ' ' + heading.textContent;
+      
+      parent = parent.parentElement;
+    }
+    
+    return context.trim();
+  }
+  
+  // Find all fillable elements
   function findFields() {
     const textSelectors = [
       'input[type="text"]:not([readonly]):not([disabled])',
@@ -323,17 +435,26 @@
         return true;
       });
     
-    // Find SELECT dropdowns
     const selectFields = Array.from(document.querySelectorAll('select:not([disabled])'))
       .filter(el => {
         const style = window.getComputedStyle(el);
         return style.display !== 'none' && style.visibility !== 'hidden';
       });
     
-    return { textFields, selectFields };
+    // Find radio button groups
+    const radioGroups = new Map();
+    const radios = document.querySelectorAll('input[type="radio"]:not([disabled])');
+    radios.forEach(radio => {
+      const name = radio.name;
+      if (name && !radioGroups.has(name)) {
+        radioGroups.set(name, radio.closest('fieldset, [role="radiogroup"], div'));
+      }
+    });
+    
+    return { textFields, selectFields, radioGroups };
   }
   
-  // Fill form with human-like behavior
+  // Fill form
   async function fillForm() {
     if (isProcessing) {
       console.log('JobFill: Already processing');
@@ -344,8 +465,8 @@
     fillCount = 0;
     updateIndicator('Filling...', '#f59e0b');
     
-    const { textFields, selectFields } = findFields();
-    console.log(`JobFill: Found ${textFields.length} text fields, ${selectFields.length} dropdowns`);
+    const { textFields, selectFields, radioGroups } = findFields();
+    console.log(`JobFill: Found ${textFields.length} text fields, ${selectFields.length} dropdowns, ${radioGroups.size} radio groups`);
     
     // Fill text fields
     for (let i = 0; i < textFields.length; i++) {
@@ -353,7 +474,7 @@
       const value = getFieldValue(field);
       
       if (value && (!field.value || field.value.trim() === '')) {
-        console.log(`JobFill: Filling "${field.name || field.id}" with "${value.substring(0, 20)}..."`);
+        console.log(`JobFill: Filling "${field.name || field.id}" with "${value.substring(0, 30)}..."`);
         
         if (settings?.random_delays) {
           await new Promise(r => setTimeout(r, 300 + Math.random() * 700));
@@ -365,9 +486,13 @@
         field.scrollIntoView({ behavior: 'smooth', block: 'center' });
         await new Promise(r => setTimeout(r, 200));
         
-        await new Promise(resolve => {
-          humanType(field, value, resolve);
-        });
+        // Check if this is an autocomplete field (location)
+        const label = getFieldLabel(field).toLowerCase();
+        if (fieldPatterns.location.test(label) || field.getAttribute('role') === 'combobox') {
+          await handleAutocompleteDropdown(field, value);
+        } else {
+          await new Promise(resolve => humanType(field, value, resolve));
+        }
         
         fillCount++;
         updateIndicator(`Filled ${fillCount}`, '#14b8a6');
@@ -393,6 +518,48 @@
       }
     }
     
+    // Fill radio button groups
+    for (const [name, container] of radioGroups) {
+      if (!container) continue;
+      
+      const context = getFieldGroupContext(container);
+      console.log(`JobFill: Processing radio group "${name}" with context: ${context.substring(0, 50)}...`);
+      
+      // Check if already answered
+      const checkedRadio = container.querySelector('input[type="radio"]:checked');
+      if (checkedRadio) continue;
+      
+      // Determine value to select
+      let valueToSelect = null;
+      
+      // Check for Yes/No questions
+      const yesNoValue = getYesNoValue(context);
+      if (yesNoValue) {
+        valueToSelect = yesNoValue;
+      }
+      
+      // Check for demographics
+      if (!valueToSelect) {
+        const demoValue = getDemographicValue(context);
+        if (demoValue) {
+          valueToSelect = demoValue;
+        }
+      }
+      
+      if (valueToSelect) {
+        if (settings?.random_delays) {
+          await new Promise(r => setTimeout(r, 200 + Math.random() * 400));
+        }
+        
+        const filled = await handleRadioButton(container, valueToSelect, context);
+        if (filled) {
+          fillCount++;
+          updateIndicator(`Filled ${fillCount}`, '#14b8a6');
+          console.log(`JobFill: Selected "${valueToSelect}" for "${name}"`);
+        }
+      }
+    }
+    
     isProcessing = false;
     updateIndicator(`✓ ${fillCount} filled`, '#22c55e');
     
@@ -408,7 +575,7 @@
     return { filled: fillCount };
   }
   
-  // Log application to dashboard
+  // Log application
   function logApplication() {
     const jobTitle = extractJobTitle();
     const company = extractCompanyName();
