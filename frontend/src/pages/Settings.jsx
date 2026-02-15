@@ -419,9 +419,9 @@ export default function Settings() {
               </Select>
               
               {/* OpenAI API Key */}
-              {settings.ai_provider === 'openai' && (
+              {(settings.ai_provider === 'openai' || settings.ai_provider === 'codex') && (
                 <div className="space-y-2 pt-2">
-                  <Label className="text-sm">OpenAI API Key</Label>
+                  <Label className="text-sm">OpenAI API Key {settings.ai_provider === 'codex' && '(for Codex)'}</Label>
                   <div className="flex gap-2">
                     <div className="relative flex-1">
                       <Input
