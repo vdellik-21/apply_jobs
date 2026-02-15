@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the JobFill AI Chrome Extension Dashboard at https://auto-applicant-1.preview.emergentagent.com"
+user_problem_statement: "Test the JobFill AI Chrome Extension Dashboard at https://formzap-1.preview.emergentagent.com"
 
 frontend:
   - task: "Dashboard Page"

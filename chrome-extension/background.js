@@ -1,5 +1,5 @@
 // JobFill AI - Background Service Worker
-const API_BASE = 'https://auto-applicant-1.preview.emergentagent.com';
+const API_BASE = 'https://formzap-1.preview.emergentagent.com';
 
 // Initialize extension
 chrome.runtime.onInstalled.addListener(() => {

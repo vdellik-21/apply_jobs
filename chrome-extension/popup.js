@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Dashboard button click
   dashboardBtn.addEventListener('click', () => {
-    chrome.tabs.create({ url: 'https://auto-applicant-1.preview.emergentagent.com' });
+    chrome.tabs.create({ url: 'https://formzap-1.preview.emergentagent.com' });
   });
   
   // Enable toggle click

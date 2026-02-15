@@ -30,7 +30,7 @@ Auto-fill job applications with AI-powered field matching and stealth mode.
 ## Dashboard
 
 Access your dashboard at:
-https://auto-applicant-1.preview.emergentagent.com
+https://formzap-1.preview.emergentagent.com
 
 - Manage your profile information
 - View application history
