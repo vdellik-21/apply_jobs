@@ -167,9 +167,28 @@ DEFAULT_PROFILE = {
         "phone": "+1 (309) 612-8928",
         "linkedin": "linkedin.com/in/vineethdellikar",
         "location": "Normal, IL, USA",
-        "website": None
+        "street_address": "906 Hovey Ave Apt 2",
+        "city": "Normal",
+        "state": "IL",
+        "state_full": "Illinois",
+        "zip_code": "61761",
+        "country": "United States",
+        "country_code": "US",
+        "website": None,
+        "github": None,
+        "portfolio": None
     },
     "summary": "Results-driven Marketing Analytics professional with 4+ years of experience in digital marketing, performance marketing, and data-driven campaign optimization. Currently pursuing MS in Marketing Analytics (STEM) at Illinois State University with a 3.92 GPA. Proven track record of achieving 28-32x ROAS on high-ticket B2C campaigns and generating $336K-$384K monthly revenue.",
+    "highlight_tags": [
+        "28x-32x ROAS Achieved",
+        "$336K-$384K Monthly Revenue",
+        "4+ Years Marketing Experience",
+        "3.92 GPA - MS Marketing Analytics",
+        "STEM Designated Program",
+        "Google & Meta Certified",
+        "14 Professional Certifications",
+        "US Work Authorization"
+    ],
     "work_experience": [
         {
             "id": "exp1",
@@ -179,8 +198,8 @@ DEFAULT_PROFILE = {
             "start_date": "Aug 2025",
             "end_date": "May 2026",
             "current": True,
-            "description": "Collaborate with faculty on research papers, build AI-powered apps for research tasks, synthesize journal insights, conduct literature reviews.",
-            "achievements": ["100+ marketing research papers supported", "30% research prep time reduction", "6+ hours/week saved via AI tools"]
+            "description": "Collaborate with faculty on research papers, build AI-powered apps for research tasks, synthesize journal insights, conduct literature reviews, develop data storytelling frameworks.",
+            "achievements": ["100+ marketing research papers supported", "30% research prep time reduction", "6+ hours/week saved via AI tools", "50+ journal sources synthesized", "4+ faculty collaborations"]
         },
         {
             "id": "exp2",
@@ -190,7 +209,7 @@ DEFAULT_PROFILE = {
             "start_date": "May 2025",
             "end_date": "Dec 2025",
             "current": False,
-            "description": "Managed paid advertising for US IVF clinics, executed Meta & Google Ads, designed lead funnels, built Tableau dashboards.",
+            "description": "Managed paid advertising for US IVF clinics, executed Meta & Google Ads, designed lead funnels, built Tableau dashboards, conducted localized market research.",
             "achievements": ["35% improvement in monthly patient consultations", "28% reduction in Cost per Consultation", "40% increase in appointment booking rates"]
         },
         {
@@ -201,8 +220,8 @@ DEFAULT_PROFILE = {
             "start_date": "Oct 2024",
             "end_date": "Dec 2025",
             "current": False,
-            "description": "Led marketing campaigns, revamped branding and outreach, used A/B testing and analytics for student organization.",
-            "achievements": ["60% YoY increase in student event participation", "25% boost in new member sign-ups"]
+            "description": "Led marketing campaigns, revamped branding and outreach, used A/B testing and analytics for student organization, initiated member retention programs.",
+            "achievements": ["60% YoY increase in student event participation", "25% boost in new member sign-ups", "Higher engagement rates", "Improved brand visibility"]
         },
         {
             "id": "exp4",
@@ -212,8 +231,8 @@ DEFAULT_PROFILE = {
             "start_date": "Apr 2021",
             "end_date": "July 2024",
             "current": False,
-            "description": "Freelance digital marketing consultancy for high-ticket IVF clients. Managed Facebook ad campaigns with $12,000/month budget.",
-            "achievements": ["28x-32x ROAS achieved", "28-32 deals closed per week", "$336,000-$384,000 monthly revenue generated"]
+            "description": "Freelance digital marketing consultancy for high-ticket IVF clients. Managed Facebook ad campaigns with $12,000/month budget. Developed market segmentation and GTM strategies.",
+            "achievements": ["28x-32x ROAS achieved", "28-32 deals closed per week", "$12,000 average deal size per patient", "$336,000-$384,000 monthly revenue generated"]
         },
         {
             "id": "exp5",
@@ -223,8 +242,52 @@ DEFAULT_PROFILE = {
             "start_date": "Apr 2020",
             "end_date": "Apr 2021",
             "current": False,
-            "description": "Executed market research with 10,000+ survey respondents, developed market segmentation and pricing strategies.",
-            "achievements": ["125% ROI achieved", "1,000+ sign-ups in month 1", "$44,000 revenue in month 1"]
+            "description": "Executed market research with 10,000+ survey respondents, developed market segmentation and pricing strategies, built multi-channel GTM plan.",
+            "achievements": ["125% ROI achieved", "Outperformed venture-backed competitor", "1,000+ sign-ups in month 1", "$44,000 revenue in month 1", "$44/month membership pricing established"]
+        },
+        {
+            "id": "exp6",
+            "title": "Partner Acquisition Specialist",
+            "company": "UrbanCompany",
+            "location": "India",
+            "start_date": "Feb 2020",
+            "end_date": "Apr 2020",
+            "current": False,
+            "description": "India's largest home services marketplace. Generated qualified partner appointments through outbound prospecting, onboarded new service partners.",
+            "achievements": ["7-8 qualified partner appointments per day", "50+ new service partners onboarded within 3 months"]
+        },
+        {
+            "id": "exp7",
+            "title": "Program Coordinator",
+            "company": "Landmark Worldwide",
+            "location": "India",
+            "start_date": "Jan 2020",
+            "end_date": "Sept 2020",
+            "current": False,
+            "description": "Orchestrated program execution for large events, managed cross-functional teams of 50+ volunteers, ensured seamless program delivery.",
+            "achievements": ["Coordinated 300-person events", "Managed 50+ volunteers", "20% reduction in setup time", "40% reduction in disruptions"]
+        },
+        {
+            "id": "exp8",
+            "title": "Business Development Intern",
+            "company": "AIESEC",
+            "location": "India",
+            "start_date": "Oct 2019",
+            "end_date": "Jan 2020",
+            "current": False,
+            "description": "Contributed to international student exchange program promotion, enhanced leadership and cross-cultural communication, led recruitment initiatives.",
+            "achievements": ["Led student recruitment initiatives", "Coordinated development sessions", "Cross-cultural communication"]
+        },
+        {
+            "id": "exp9",
+            "title": "Digital Marketing Intern",
+            "company": "DDIP (Digital Deepak Internship Program)",
+            "location": "India",
+            "start_date": "2019",
+            "end_date": "2019",
+            "current": False,
+            "description": "6-month intensive digital marketing training. Published SEO-optimized content, built WordPress websites, trained in Meta Ads, Google Ads, SEO, email marketing.",
+            "achievements": ["10+ SEO-optimized blog posts published", "Built WordPress websites", "Designed landing pages and sales funnels"]
         }
     ],
     "education": [
