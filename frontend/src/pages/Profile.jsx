@@ -482,23 +482,51 @@ export default function Profile() {
       <motion.div variants={itemVariants}>
         <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
           <CardHeader>
-            <CardTitle className="text-lg font-display font-semibold flex items-center gap-2">
-              <Award className="w-5 h-5 text-primary" />
-              Highlight Tags
-            </CardTitle>
-            <CardDescription>Key achievements that stand out on applications</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg font-display font-semibold flex items-center gap-2">
+                  <Award className="w-5 h-5 text-primary" />
+                  Highlight Tags
+                </CardTitle>
+                <CardDescription>Key achievements that stand out on applications</CardDescription>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => setEditingTags(!editingTags)}>
+                {editingTags ? 'Done' : 'Edit'}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
               {(profile.highlight_tags || defaultProfile.highlight_tags).map((tag, index) => (
                 <Badge 
                   key={index} 
-                  className="px-3 py-1.5 text-sm bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
+                  className="px-3 py-1.5 text-sm bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors group"
                 >
                   {tag}
+                  {editingTags && (
+                    <button
+                      onClick={() => removeTag(tag)}
+                      className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
                 </Badge>
               ))}
             </div>
+            {editingTags && (
+              <div className="flex gap-2 mt-4">
+                <Input
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  placeholder="Add a highlight tag (e.g., '5x Revenue Growth')..."
+                  onKeyDown={(e) => e.key === 'Enter' && addTag()}
+                />
+                <Button onClick={addTag} size="icon" variant="outline">
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </motion.div>
