@@ -50,9 +50,28 @@ const defaultProfile = {
     phone: "+1 (309) 612-8928",
     linkedin: "linkedin.com/in/vineethdellikar",
     location: "Normal, IL, USA",
-    website: ""
+    street_address: "906 Hovey Ave Apt 2",
+    city: "Normal",
+    state: "IL",
+    state_full: "Illinois",
+    zip_code: "61761",
+    country: "United States",
+    country_code: "US",
+    website: "",
+    github: "",
+    portfolio: ""
   },
-  summary: "Results-driven Marketing Analytics professional with 4+ years of experience in digital marketing, performance marketing, and data-driven campaign optimization. Currently pursuing MS in Marketing Analytics (STEM) at Illinois State University with a 3.92 GPA.",
+  summary: "Results-driven Marketing Analytics professional with 4+ years of experience in digital marketing, performance marketing, and data-driven campaign optimization. Currently pursuing MS in Marketing Analytics (STEM) at Illinois State University with a 3.92 GPA. Proven track record of achieving 28-32x ROAS on high-ticket B2C campaigns.",
+  highlight_tags: [
+    "28x-32x ROAS Achieved",
+    "$336K-$384K Monthly Revenue",
+    "4+ Years Marketing Experience",
+    "3.92 GPA - MS Marketing Analytics",
+    "STEM Designated Program",
+    "Google & Meta Certified",
+    "14 Professional Certifications",
+    "US Work Authorization"
+  ],
   work_experience: [
     {
       id: "exp1",
@@ -63,7 +82,7 @@ const defaultProfile = {
       end_date: "May 2026",
       current: true,
       description: "Collaborate with faculty on research papers, build AI-powered apps for research tasks.",
-      achievements: ["100+ marketing research papers supported", "30% research prep time reduction"]
+      achievements: ["100+ marketing research papers supported", "30% research prep time reduction", "6+ hours/week saved via AI tools"]
     },
     {
       id: "exp2",
@@ -74,7 +93,84 @@ const defaultProfile = {
       end_date: "Dec 2025",
       current: false,
       description: "Managed paid advertising for US IVF clinics, executed Meta & Google Ads.",
-      achievements: ["35% improvement in consultations", "28% reduction in Cost per Consultation"]
+      achievements: ["35% improvement in consultations", "28% reduction in Cost per Consultation", "40% increase in booking rates"]
+    },
+    {
+      id: "exp3",
+      title: "Marketing Chairperson",
+      company: "M.A.S.S. RSO, Illinois State University",
+      location: "Normal, IL",
+      start_date: "Oct 2024",
+      end_date: "Dec 2025",
+      current: false,
+      description: "Led marketing campaigns, revamped branding and outreach using A/B testing.",
+      achievements: ["60% YoY increase in event participation", "25% boost in new member sign-ups"]
+    },
+    {
+      id: "exp4",
+      title: "Digital Marketing Manager",
+      company: "Marketing Dollar",
+      location: "India",
+      start_date: "Apr 2021",
+      end_date: "July 2024",
+      current: false,
+      description: "Freelance consultancy for high-ticket IVF clients. Managed $12,000/month ad budget.",
+      achievements: ["28x-32x ROAS achieved", "28-32 deals closed per week", "$336K-$384K monthly revenue"]
+    },
+    {
+      id: "exp5",
+      title: "Digital Marketing Specialist",
+      company: "The Stars Wellness",
+      location: "India",
+      start_date: "Apr 2020",
+      end_date: "Apr 2021",
+      current: false,
+      description: "Market research with 10,000+ survey respondents, pricing strategy development.",
+      achievements: ["125% ROI achieved", "1,000+ sign-ups in month 1", "$44,000 revenue in month 1"]
+    },
+    {
+      id: "exp6",
+      title: "Partner Acquisition Specialist",
+      company: "UrbanCompany",
+      location: "India",
+      start_date: "Feb 2020",
+      end_date: "Apr 2020",
+      current: false,
+      description: "India's largest home services marketplace. Outbound prospecting and partner onboarding.",
+      achievements: ["7-8 qualified appointments per day", "50+ partners onboarded in 3 months"]
+    },
+    {
+      id: "exp7",
+      title: "Program Coordinator",
+      company: "Landmark Worldwide",
+      location: "India",
+      start_date: "Jan 2020",
+      end_date: "Sept 2020",
+      current: false,
+      description: "Orchestrated large events, managed 50+ volunteers, crisis management.",
+      achievements: ["Coordinated 300-person events", "20% reduction in setup time"]
+    },
+    {
+      id: "exp8",
+      title: "Business Development Intern",
+      company: "AIESEC",
+      location: "India",
+      start_date: "Oct 2019",
+      end_date: "Jan 2020",
+      current: false,
+      description: "International student exchange program promotion, recruitment initiatives.",
+      achievements: ["Led student recruitment", "Cross-cultural communication"]
+    },
+    {
+      id: "exp9",
+      title: "Digital Marketing Intern",
+      company: "DDIP (Digital Deepak)",
+      location: "India",
+      start_date: "2019",
+      end_date: "2019",
+      current: false,
+      description: "6-month intensive training in Meta Ads, Google Ads, SEO, email marketing.",
+      achievements: ["10+ SEO blog posts", "Built WordPress sites", "Landing page design"]
     }
   ],
   education: [
