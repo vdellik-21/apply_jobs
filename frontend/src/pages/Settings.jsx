@@ -223,34 +223,56 @@ export default function Settings() {
       <motion.div variants={itemVariants}>
         <Card className="border-border/50">
           <CardHeader>
-            <CardTitle className="text-lg font-display font-semibold flex items-center gap-2">
-              <Globe className="w-5 h-5 text-accent" />
-              Supported Platforms
-            </CardTitle>
-            <CardDescription>Choose which job boards to auto-fill</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {platforms.map((platform) => (
-                <div 
-                  key={platform.id}
-                  className={`flex items-center justify-between p-4 rounded-xl border transition-colors ${
-                    settings.supported_platforms[platform.id] 
-                      ? 'border-primary/30 bg-primary/5' 
-                      : 'border-border/50 bg-muted/20'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{platform.icon}</span>
-                    <span className="font-medium text-foreground">{platform.name}</span>
-                  </div>
-                  <Switch
-                    checked={settings.supported_platforms[platform.id]}
-                    onCheckedChange={(checked) => updatePlatform(platform.id, checked)}
-                  />
-                </div>
-              ))}
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg font-display font-semibold flex items-center gap-2">
+                  <Globe className="w-5 h-5 text-accent" />
+                  Supported Platforms
+                </CardTitle>
+                <CardDescription>Choose which job boards to auto-fill (15 platforms)</CardDescription>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  const allEnabled = Object.values(settings.supported_platforms).every(v => v);
+                  const newState = {};
+                  platforms.forEach(p => { newState[p.id] = !allEnabled; });
+                  setSettings({ ...settings, supported_platforms: newState });
+                }}
+              >
+                Toggle All
+              </Button>
             </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Group by category */}
+            {['Major', 'Tech', 'ATS', 'Startup', 'Other'].map(category => (
+              <div key={category}>
+                <h4 className="text-sm font-medium text-muted-foreground mb-3">{category} Job Boards</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {platforms.filter(p => p.category === category).map((platform) => (
+                    <div 
+                      key={platform.id}
+                      className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${
+                        settings.supported_platforms[platform.id] 
+                          ? 'border-primary/30 bg-primary/5' 
+                          : 'border-border/50 bg-muted/20'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{platform.icon}</span>
+                        <span className="font-medium text-sm text-foreground">{platform.name}</span>
+                      </div>
+                      <Switch
+                        checked={settings.supported_platforms[platform.id] || false}
+                        onCheckedChange={(checked) => updatePlatform(platform.id, checked)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </CardContent>
         </Card>
       </motion.div>
