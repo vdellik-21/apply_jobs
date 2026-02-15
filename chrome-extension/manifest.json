@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "JobFill AI - Auto Application Filler",
+  "version": "1.0.0",
+  "description": "AI-powered job application auto-filler with stealth mode for LinkedIn, Indeed, Greenhouse, and more",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://www.linkedin.com/*",
+    "https://linkedin.com/*",
+    "https://www.indeed.com/*",
+    "https://indeed.com/*",
+    "https://boards.greenhouse.io/*",
+    "https://jobs.lever.co/*",
+    "https://*.workday.com/*",
+    "https://www.glassdoor.com/*",
+    "https://www.ziprecruiter.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.linkedin.com/jobs/*",
+        "https://linkedin.com/jobs/*",
+        "https://www.indeed.com/*",
+        "https://boards.greenhouse.io/*",
+        "https://jobs.lever.co/*",
+        "https://*.workday.com/*",
+        "https://www.glassdoor.com/*",
+        "https://www.ziprecruiter.com/*"
+      ],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
