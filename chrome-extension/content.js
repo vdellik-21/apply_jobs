@@ -1479,14 +1479,66 @@
           fillCount++;
           updateIndicator(`✏️ ${fillCount} filled`, '#14b8a6');
           console.log(`JobFill: Selected "${valueToSelect}" for "${name}"`);
+        } else {
+          console.log(`JobFill: Failed to select radio for "${name}", adding to stuck`);
+          stuckFields.push({ element: container, context, type: 'radio' });
         }
       }
     }
     
-    // NEW: Handle ARIA-based radio groups (custom UIs)
+    // PRIORITY: Handle segmented Yes/No controls FIRST (like in your screenshots)
+    console.log('JobFill: Looking for segmented Yes/No controls...');
+    const segmentedControls = findSegmentedYesNoControls();
+    console.log(`JobFill: Found ${segmentedControls.length} segmented Yes/No controls`);
+    
+    for (const control of segmentedControls) {
+      const { container, yesEl, noEl } = control;
+      if (container.dataset?.jobfillProcessed) continue;
+      
+      // Check if already selected
+      const hasSelection = container.querySelector('.selected, .active, [aria-checked="true"], [data-selected="true"]') ||
+                           yesEl?.classList.contains('selected') || noEl?.classList.contains('selected') ||
+                           yesEl?.classList.contains('active') || noEl?.classList.contains('active');
+      
+      if (hasSelection) {
+        console.log('JobFill: Segmented control already has selection, skipping');
+        continue;
+      }
+      
+      const context = getFieldGroupContext(container);
+      console.log(`JobFill: Processing segmented control: ${context.substring(0, 100)}...`);
+      
+      let valueToSelect = getYesNoValue(context);
+      
+      if (valueToSelect) {
+        const targetEl = valueToSelect === 'yes' ? yesEl : noEl;
+        
+        if (targetEl) {
+          if (settings?.random_delays) {
+            await new Promise(r => setTimeout(r, 200 + Math.random() * 400));
+          }
+          
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          await new Promise(r => setTimeout(r, 150));
+          simulateMouseMove(targetEl);
+          await new Promise(r => setTimeout(r, 100));
+          smartClick(targetEl);
+          
+          container.dataset.jobfillProcessed = 'true';
+          fillCount++;
+          updateIndicator(`✏️ ${fillCount} filled`, '#14b8a6');
+          console.log(`JobFill: Clicked "${valueToSelect}" on segmented control`);
+        }
+      } else {
+        console.log('JobFill: Could not determine Yes/No value for context, adding to stuck');
+        stuckFields.push({ element: container, context, type: 'segmented-yesno' });
+      }
+    }
+    
+    // Handle ARIA-based radio groups (custom UIs)
     const ariaGroups = findAriaRadioGroups();
     for (const group of ariaGroups) {
-      if (group.dataset?.jobfillSkipped) continue;
+      if (group.dataset?.jobfillSkipped || group.dataset?.jobfillProcessed) continue;
       if (group.querySelector('[aria-checked="true"], [aria-selected="true"], .selected, .active')) continue;
       
       const context = getFieldGroupContext(group);
@@ -1506,20 +1558,20 @@
             fillCount++;
             updateIndicator(`✏️ ${fillCount} filled`, '#14b8a6');
           } else {
-            stuckFields.push({ element: group, context, type: 'custom-radio' });
+            stuckFields.push({ element: group, context, type: 'aria-radio' });
           }
         }
       }
     }
     
-    // NEW: Find and handle custom Yes/No button groups
+    // Find and handle custom Yes/No button groups
     const customYesNoContainers = document.querySelectorAll(
       '[class*="yes-no"], [class*="yesno"], [class*="choice"], [class*="toggle"], ' +
       '[class*="question"], [class*="option-group"], fieldset'
     );
     
     for (const container of customYesNoContainers) {
-      if (!isVisible(container) || container.dataset?.jobfillSkipped) continue;
+      if (!isVisible(container) || container.dataset?.jobfillSkipped || container.dataset?.jobfillProcessed) continue;
       
       // Skip if already has selected state
       if (container.querySelector('.selected, .active, [aria-checked="true"], input:checked')) continue;
