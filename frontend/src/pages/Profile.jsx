@@ -408,6 +408,97 @@ export default function Profile() {
                 />
               </div>
             </div>
+            
+            {/* Address Section */}
+            <div className="pt-4 border-t border-border/50">
+              <h4 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-muted-foreground" />
+                Address (for smart auto-fill)
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="space-y-2 md:col-span-2 lg:col-span-2">
+                  <label className="text-xs text-muted-foreground">Street Address</label>
+                  <Input
+                    value={profile.personal_info.street_address || ''}
+                    onChange={(e) => updatePersonalInfo('street_address', e.target.value)}
+                    placeholder="123 Main St Apt 1"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">City</label>
+                  <Input
+                    value={profile.personal_info.city || ''}
+                    onChange={(e) => updatePersonalInfo('city', e.target.value)}
+                    placeholder="City"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">State (Abbrev)</label>
+                  <Input
+                    value={profile.personal_info.state || ''}
+                    onChange={(e) => updatePersonalInfo('state', e.target.value)}
+                    placeholder="IL"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">State (Full)</label>
+                  <Input
+                    value={profile.personal_info.state_full || ''}
+                    onChange={(e) => updatePersonalInfo('state_full', e.target.value)}
+                    placeholder="Illinois"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">ZIP Code</label>
+                  <Input
+                    value={profile.personal_info.zip_code || ''}
+                    onChange={(e) => updatePersonalInfo('zip_code', e.target.value)}
+                    placeholder="61761"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">Country</label>
+                  <Input
+                    value={profile.personal_info.country || ''}
+                    onChange={(e) => updatePersonalInfo('country', e.target.value)}
+                    placeholder="United States"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">Country Code</label>
+                  <Input
+                    value={profile.personal_info.country_code || ''}
+                    onChange={(e) => updatePersonalInfo('country_code', e.target.value)}
+                    placeholder="US"
+                  />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Highlight Tags */}
+      <motion.div variants={itemVariants}>
+        <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
+          <CardHeader>
+            <CardTitle className="text-lg font-display font-semibold flex items-center gap-2">
+              <Award className="w-5 h-5 text-primary" />
+              Highlight Tags
+            </CardTitle>
+            <CardDescription>Key achievements that stand out on applications</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {(profile.highlight_tags || defaultProfile.highlight_tags).map((tag, index) => (
+                <Badge 
+                  key={index} 
+                  className="px-3 py-1.5 text-sm bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
+                >
+                  {tag}
+                </Badge>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </motion.div>
@@ -437,11 +528,15 @@ export default function Profile() {
       <motion.div variants={itemVariants}>
         <Card className="border-border/50">
           <CardHeader>
-            <CardTitle className="text-lg font-display font-semibold flex items-center gap-2">
-              <Briefcase className="w-5 h-5 text-success" />
-              Work Experience
-            </CardTitle>
-            <CardDescription>Your professional experience for applications</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg font-display font-semibold flex items-center gap-2">
+                  <Briefcase className="w-5 h-5 text-success" />
+                  Work Experience
+                </CardTitle>
+                <CardDescription>{profile.work_experience.length} positions</CardDescription>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <Accordion type="single" collapsible className="space-y-2">
