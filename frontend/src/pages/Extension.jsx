@@ -739,10 +739,16 @@ SUPPORTED PLATFORMS:
           <h1 className="text-2xl lg:text-3xl font-display font-bold text-foreground">Chrome Extension</h1>
           <p className="text-muted-foreground mt-1">Install and configure the auto-fill extension</p>
         </div>
-        <Button onClick={downloadExtension} className="gap-2 gradient-primary text-primary-foreground">
-          <Download className="w-4 h-4" />
-          Download Instructions
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button onClick={downloadExtension} className="gap-2 gradient-primary text-primary-foreground">
+            <Download className="w-4 h-4" />
+            Download Extension
+          </Button>
+          <Button onClick={downloadInstructions} variant="outline" className="gap-2">
+            <Info className="w-4 h-4" />
+            Instructions
+          </Button>
+        </div>
       </motion.div>
 
       {/* Tabs */}
