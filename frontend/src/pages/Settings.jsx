@@ -11,7 +11,11 @@ import {
   ToggleLeft,
   Gauge,
   MousePointer,
-  Bot
+  Bot,
+  Key,
+  Eye,
+  EyeOff,
+  RefreshCw
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -19,6 +23,7 @@ import { Switch } from '../components/ui/switch';
 import { Slider } from '../components/ui/slider';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
+import { Input } from '../components/ui/input';
 import {
   Select,
   SelectContent,
@@ -33,13 +38,21 @@ import axios from 'axios';
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
 const platforms = [
-  { id: 'linkedin', name: 'LinkedIn', icon: '💼' },
-  { id: 'indeed', name: 'Indeed', icon: '🔍' },
-  { id: 'greenhouse', name: 'Greenhouse', icon: '🌿' },
-  { id: 'lever', name: 'Lever', icon: '🔧' },
-  { id: 'workday', name: 'Workday', icon: '📊' },
-  { id: 'glassdoor', name: 'Glassdoor', icon: '🚪' },
-  { id: 'ziprecruiter', name: 'ZipRecruiter', icon: '⚡' },
+  { id: 'linkedin', name: 'LinkedIn', icon: '💼', category: 'Major' },
+  { id: 'indeed', name: 'Indeed', icon: '🔍', category: 'Major' },
+  { id: 'glassdoor', name: 'Glassdoor', icon: '🚪', category: 'Major' },
+  { id: 'ziprecruiter', name: 'ZipRecruiter', icon: '⚡', category: 'Major' },
+  { id: 'monster', name: 'Monster', icon: '👹', category: 'Major' },
+  { id: 'dice', name: 'Dice', icon: '🎲', category: 'Tech' },
+  { id: 'greenhouse', name: 'Greenhouse', icon: '🌿', category: 'ATS' },
+  { id: 'lever', name: 'Lever', icon: '🔧', category: 'ATS' },
+  { id: 'workday', name: 'Workday', icon: '📊', category: 'ATS' },
+  { id: 'ashbyhq', name: 'Ashby HQ', icon: '🏢', category: 'ATS' },
+  { id: 'ycombinator', name: 'Y Combinator', icon: '🚀', category: 'Startup' },
+  { id: 'wellfound', name: 'Wellfound (AngelList)', icon: '😇', category: 'Startup' },
+  { id: 'startupsgallery', name: 'Startups.Gallery', icon: '🖼️', category: 'Startup' },
+  { id: 'simplyhired', name: 'SimplyHired', icon: '✅', category: 'Other' },
+  { id: 'careerbuilder', name: 'CareerBuilder', icon: '🏗️', category: 'Other' },
 ];
 
 const typingSpeedOptions = [
@@ -47,6 +60,12 @@ const typingSpeedOptions = [
   { value: 'fast', label: 'Fast', description: '30-80ms per character' },
   { value: 'human', label: 'Human-like', description: '50-150ms (recommended)' },
   { value: 'slow', label: 'Slow', description: '100-300ms per character' },
+];
+
+const aiProviderOptions = [
+  { value: 'emergent', label: 'Emergent AI', description: 'Default - No API key needed' },
+  { value: 'openai', label: 'OpenAI (GPT-4)', description: 'Requires API key' },
+  { value: 'claude', label: 'Claude (Anthropic)', description: 'Requires API key' },
 ];
 
 const defaultSettings = {
@@ -58,7 +77,15 @@ const defaultSettings = {
     lever: true,
     workday: true,
     glassdoor: true,
-    ziprecruiter: true
+    ziprecruiter: true,
+    dice: true,
+    monster: true,
+    ycombinator: true,
+    wellfound: true,
+    startupsgallery: true,
+    ashbyhq: true,
+    simplyhired: true,
+    careerbuilder: true
   },
   typing_speed: 'human',
   typing_delay_min: 50,
@@ -66,13 +93,18 @@ const defaultSettings = {
   random_delays: true,
   auto_submit: false,
   save_applications: true,
-  ai_matching: true
+  ai_matching: true,
+  ai_provider: 'emergent',
+  openai_api_key: '',
+  claude_api_key: ''
 };
 
 export default function Settings() {
   const [settings, setSettings] = useState(defaultSettings);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showOpenAIKey, setShowOpenAIKey] = useState(false);
+  const [showClaudeKey, setShowClaudeKey] = useState(false);
 
   useEffect(() => {
     fetchSettings();
