@@ -53,7 +53,17 @@ class PersonalInfo(BaseModel):
     phone: str = "+1 (309) 612-8928"
     linkedin: str = "linkedin.com/in/vineethdellikar"
     location: str = "Normal, IL, USA"
+    # Address components for smart filling
+    street_address: str = "906 Hovey Ave Apt 2"
+    city: str = "Normal"
+    state: str = "IL"
+    state_full: str = "Illinois"
+    zip_code: str = "61761"
+    country: str = "United States"
+    country_code: str = "US"
     website: Optional[str] = None
+    github: Optional[str] = None
+    portfolio: Optional[str] = None
 
 class WorkExperience(BaseModel):
     id: str
