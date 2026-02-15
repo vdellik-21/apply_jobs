@@ -124,7 +124,15 @@ class Settings(BaseModel):
         "lever": True,
         "workday": True,
         "glassdoor": True,
-        "ziprecruiter": True
+        "ziprecruiter": True,
+        "dice": True,
+        "monster": True,
+        "ycombinator": True,
+        "wellfound": True,
+        "startupsgallery": True,
+        "ashbyhq": True,
+        "simplyhired": True,
+        "careerbuilder": True
     }
     typing_speed: str = "human"  # instant, fast, human, slow
     typing_delay_min: int = 50
@@ -133,6 +141,10 @@ class Settings(BaseModel):
     auto_submit: bool = False
     save_applications: bool = True
     ai_matching: bool = True
+    # AI Provider settings
+    ai_provider: str = "emergent"  # emergent, openai, claude
+    openai_api_key: Optional[str] = None
+    claude_api_key: Optional[str] = None
 
 class FormField(BaseModel):
     field_name: str
