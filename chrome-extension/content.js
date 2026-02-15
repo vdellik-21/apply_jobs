@@ -26,6 +26,666 @@
   let userGuideMode = false;
   
   // =====================================================
+  // STUCK STATE UI PANEL
+  // =====================================================
+  
+  function showStuckPanel(reason, element = null) {
+    currentState = STATE.STUCK;
+    stuckReason = reason;
+    stuckElement = element;
+    
+    // Remove existing panel
+    removeStuckPanel();
+    
+    const panel = document.createElement('div');
+    panel.id = 'jobfill-stuck-panel';
+    panel.innerHTML = `
+      <div class="jobfill-panel-header">
+        <span class="jobfill-icon">🤔</span>
+        <span class="jobfill-title">JobFill AI Needs Help</span>
+        <button class="jobfill-close-btn" id="jobfill-close-panel">✕</button>
+      </div>
+      <div class="jobfill-panel-body">
+        <p class="jobfill-status">${reason}</p>
+        <div class="jobfill-actions">
+          <button class="jobfill-btn jobfill-btn-primary" id="jobfill-resume">▶ Resume</button>
+          <button class="jobfill-btn jobfill-btn-secondary" id="jobfill-skip">⏭ Skip Field</button>
+          <button class="jobfill-btn jobfill-btn-guide" id="jobfill-guide">👆 Click to Guide</button>
+        </div>
+        <p class="jobfill-hint" id="jobfill-guide-hint" style="display:none;">Click on the element you want me to interact with</p>
+      </div>
+    `;
+    
+    panel.style.cssText = `
+      position: fixed !important;
+      bottom: 80px !important;
+      right: 20px !important;
+      width: 320px !important;
+      background: linear-gradient(145deg, #1e293b, #0f172a) !important;
+      border: 1px solid rgba(20, 184, 166, 0.3) !important;
+      border-radius: 16px !important;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 20px rgba(20, 184, 166, 0.2) !important;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+      z-index: 2147483647 !important;
+      overflow: hidden !important;
+      animation: jobfill-slideIn 0.3s ease !important;
+    `;
+    
+    // Add styles
+    const style = document.createElement('style');
+    style.id = 'jobfill-stuck-styles';
+    style.textContent = `
+      @keyframes jobfill-slideIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      #jobfill-stuck-panel .jobfill-panel-header {
+        display: flex;
+        align-items: center;
+        padding: 14px 16px;
+        background: rgba(20, 184, 166, 0.15);
+        border-bottom: 1px solid rgba(20, 184, 166, 0.2);
+      }
+      
+      #jobfill-stuck-panel .jobfill-icon {
+        font-size: 20px;
+        margin-right: 10px;
+      }
+      
+      #jobfill-stuck-panel .jobfill-title {
+        flex: 1;
+        color: #f1f5f9;
+        font-weight: 600;
+        font-size: 14px;
+      }
+      
+      #jobfill-stuck-panel .jobfill-close-btn {
+        background: none;
+        border: none;
+        color: #94a3b8;
+        font-size: 16px;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: all 0.2s;
+      }
+      
+      #jobfill-stuck-panel .jobfill-close-btn:hover {
+        background: rgba(255,255,255,0.1);
+        color: #f1f5f9;
+      }
+      
+      #jobfill-stuck-panel .jobfill-panel-body {
+        padding: 16px;
+      }
+      
+      #jobfill-stuck-panel .jobfill-status {
+        color: #e2e8f0;
+        font-size: 13px;
+        line-height: 1.5;
+        margin: 0 0 16px 0;
+      }
+      
+      #jobfill-stuck-panel .jobfill-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      
+      #jobfill-stuck-panel .jobfill-btn {
+        flex: 1;
+        min-width: 90px;
+        padding: 10px 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      
+      #jobfill-stuck-panel .jobfill-btn-primary {
+        background: linear-gradient(135deg, #14b8a6, #0d9488);
+        color: white;
+      }
+      
+      #jobfill-stuck-panel .jobfill-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
+      }
+      
+      #jobfill-stuck-panel .jobfill-btn-secondary {
+        background: rgba(255,255,255,0.1);
+        color: #e2e8f0;
+      }
+      
+      #jobfill-stuck-panel .jobfill-btn-secondary:hover {
+        background: rgba(255,255,255,0.15);
+      }
+      
+      #jobfill-stuck-panel .jobfill-btn-guide {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        color: white;
+      }
+      
+      #jobfill-stuck-panel .jobfill-btn-guide:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+      }
+      
+      #jobfill-stuck-panel .jobfill-hint {
+        color: #a78bfa;
+        font-size: 12px;
+        margin: 12px 0 0 0;
+        padding: 8px 12px;
+        background: rgba(139, 92, 246, 0.15);
+        border-radius: 6px;
+        text-align: center;
+      }
+      
+      .jobfill-guide-highlight {
+        outline: 3px dashed #8b5cf6 !important;
+        outline-offset: 2px !important;
+        cursor: crosshair !important;
+      }
+      
+      .jobfill-element-highlight {
+        outline: 3px solid #f59e0b !important;
+        outline-offset: 2px !important;
+        background: rgba(245, 158, 11, 0.1) !important;
+      }
+    `;
+    
+    document.head.appendChild(style);
+    document.body.appendChild(panel);
+    
+    // Highlight the stuck element if provided
+    if (element) {
+      element.classList.add('jobfill-element-highlight');
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    // Event listeners
+    document.getElementById('jobfill-close-panel').onclick = removeStuckPanel;
+    document.getElementById('jobfill-resume').onclick = handleResume;
+    document.getElementById('jobfill-skip').onclick = handleSkip;
+    document.getElementById('jobfill-guide').onclick = handleGuideMode;
+  }
+  
+  function removeStuckPanel() {
+    const panel = document.getElementById('jobfill-stuck-panel');
+    const styles = document.getElementById('jobfill-stuck-styles');
+    if (panel) panel.remove();
+    if (styles) styles.remove();
+    
+    // Remove highlights
+    document.querySelectorAll('.jobfill-element-highlight, .jobfill-guide-highlight').forEach(el => {
+      el.classList.remove('jobfill-element-highlight', 'jobfill-guide-highlight');
+    });
+    
+    // Disable guide mode
+    if (userGuideMode) {
+      disableGuideMode();
+    }
+    
+    if (stuckElement) {
+      stuckElement.classList.remove('jobfill-element-highlight');
+    }
+    
+    currentState = STATE.IDLE;
+    stuckElement = null;
+    stuckReason = '';
+  }
+  
+  function handleResume() {
+    removeStuckPanel();
+    fillForm();
+  }
+  
+  function handleSkip() {
+    if (stuckElement) {
+      stuckElement.dataset.jobfillSkipped = 'true';
+      stuckElement.classList.remove('jobfill-element-highlight');
+    }
+    removeStuckPanel();
+    fillForm();
+  }
+  
+  function handleGuideMode() {
+    userGuideMode = true;
+    const hint = document.getElementById('jobfill-guide-hint');
+    if (hint) hint.style.display = 'block';
+    
+    // Add click listener to page
+    document.addEventListener('click', handleUserGuideClick, true);
+    
+    // Add hover highlight
+    document.addEventListener('mouseover', handleGuideHover, true);
+    document.addEventListener('mouseout', handleGuideHoverOut, true);
+  }
+  
+  function disableGuideMode() {
+    userGuideMode = false;
+    document.removeEventListener('click', handleUserGuideClick, true);
+    document.removeEventListener('mouseover', handleGuideHover, true);
+    document.removeEventListener('mouseout', handleGuideHoverOut, true);
+  }
+  
+  function handleGuideHover(e) {
+    if (!userGuideMode) return;
+    if (e.target.closest('#jobfill-stuck-panel') || e.target.id === 'jobfill-indicator') return;
+    e.target.classList.add('jobfill-guide-highlight');
+  }
+  
+  function handleGuideHoverOut(e) {
+    if (!userGuideMode) return;
+    e.target.classList.remove('jobfill-guide-highlight');
+  }
+  
+  function handleUserGuideClick(e) {
+    if (!userGuideMode) return;
+    
+    // Ignore clicks on the panel itself
+    if (e.target.closest('#jobfill-stuck-panel') || e.target.id === 'jobfill-indicator') return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const clickedElement = e.target;
+    console.log('JobFill: User guided to element:', clickedElement);
+    
+    disableGuideMode();
+    removeStuckPanel();
+    
+    // Try to interact with the clicked element
+    handleGuidedElement(clickedElement);
+  }
+  
+  async function handleGuidedElement(element) {
+    updateIndicator('🎯 Processing...', '#8b5cf6');
+    
+    await new Promise(r => setTimeout(r, 300));
+    
+    // Determine what kind of element it is and handle it
+    const tagName = element.tagName.toLowerCase();
+    const role = element.getAttribute('role');
+    const text = element.textContent?.trim().toLowerCase() || '';
+    
+    // If it's a clickable element (button, link, div with role)
+    if (tagName === 'button' || tagName === 'a' || role === 'button' || 
+        element.onclick || element.style.cursor === 'pointer') {
+      smartClick(element);
+      await new Promise(r => setTimeout(r, 500));
+    }
+    
+    // If it's an input, try to fill it
+    if (tagName === 'input' || tagName === 'textarea' || tagName === 'select') {
+      const value = getFieldValue(element);
+      if (value) {
+        if (tagName === 'select') {
+          await handleSelectDropdown(element, value);
+        } else {
+          await new Promise(resolve => humanType(element, value, resolve));
+        }
+        fillCount++;
+      }
+    }
+    
+    // Resume normal operation
+    updateIndicator('✅ Guided action complete', '#22c55e');
+    setTimeout(() => updateIndicator('⚡ JobFill Ready', '#14b8a6'), 2000);
+  }
+  
+  // =====================================================
+  // SMART NAVIGATION - FIND AND CLICK APPLY BUTTONS
+  // =====================================================
+  
+  const applyButtonPatterns = [
+    // Primary apply patterns
+    /^apply$/i,
+    /^apply now$/i,
+    /^apply for (this )?job$/i,
+    /^apply for (this )?position$/i,
+    /^apply on (company|employer) (site|website)$/i,
+    /^apply externally$/i,
+    /^quick apply$/i,
+    /^easy apply$/i,
+    /^one[- ]?click apply$/i,
+    /^submit application$/i,
+    /^start application$/i,
+    /^continue application$/i,
+    /^begin application$/i,
+    
+    // LinkedIn specific
+    /^easy apply$/i,
+    /^apply on linkedin$/i,
+    
+    // Indeed specific
+    /^apply now$/i,
+    /^continue to apply$/i,
+    
+    // Generic job site patterns
+    /^i'm interested$/i,
+    /^express interest$/i,
+    /^apply with.*profile$/i,
+    /^save and apply$/i
+  ];
+  
+  const nextButtonPatterns = [
+    /^next$/i,
+    /^continue$/i,
+    /^proceed$/i,
+    /^next step$/i,
+    /^save and continue$/i,
+    /^save & continue$/i,
+    /^submit and continue$/i,
+    /^review$/i,
+    /^review application$/i
+  ];
+  
+  function findApplyButton() {
+    console.log('JobFill: Searching for Apply button...');
+    
+    // Selectors for potential apply buttons
+    const buttonSelectors = [
+      'button',
+      'a[href*="apply"]',
+      '[role="button"]',
+      '[class*="apply"]',
+      '[data-testid*="apply"]',
+      '[data-automation*="apply"]',
+      '[aria-label*="apply" i]',
+      '.btn',
+      '.button'
+    ];
+    
+    const candidates = [];
+    
+    buttonSelectors.forEach(selector => {
+      try {
+        document.querySelectorAll(selector).forEach(el => {
+          if (isVisible(el) && !candidates.includes(el)) {
+            candidates.push(el);
+          }
+        });
+      } catch (e) {}
+    });
+    
+    // Score each candidate
+    let bestMatch = null;
+    let bestScore = 0;
+    
+    for (const el of candidates) {
+      const text = (el.textContent || el.innerText || '').trim();
+      const ariaLabel = el.getAttribute('aria-label') || '';
+      const title = el.getAttribute('title') || '';
+      const combined = `${text} ${ariaLabel} ${title}`;
+      
+      let score = 0;
+      
+      // Check against apply patterns
+      for (const pattern of applyButtonPatterns) {
+        if (pattern.test(text) || pattern.test(ariaLabel)) {
+          score += 10;
+          break;
+        }
+      }
+      
+      // Bonus for being a button element
+      if (el.tagName === 'BUTTON') score += 2;
+      if (el.getAttribute('role') === 'button') score += 1;
+      
+      // Bonus for prominent styling (large, colored)
+      const style = window.getComputedStyle(el);
+      if (el.offsetWidth > 100 && el.offsetHeight > 30) score += 2;
+      if (style.backgroundColor && !['transparent', 'rgba(0, 0, 0, 0)'].includes(style.backgroundColor)) score += 1;
+      
+      // Penalty for small/hidden
+      if (el.offsetWidth < 50 || el.offsetHeight < 20) score -= 5;
+      
+      // Check if contains "apply" in class/id
+      if ((el.className + el.id).toLowerCase().includes('apply')) score += 3;
+      
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = el;
+      }
+    }
+    
+    if (bestMatch && bestScore >= 5) {
+      console.log('JobFill: Found Apply button:', bestMatch.textContent?.trim(), 'Score:', bestScore);
+      return bestMatch;
+    }
+    
+    console.log('JobFill: No Apply button found');
+    return null;
+  }
+  
+  function findNextButton() {
+    const candidates = document.querySelectorAll('button, [role="button"], input[type="submit"], a.btn');
+    
+    for (const el of candidates) {
+      if (!isVisible(el)) continue;
+      
+      const text = (el.textContent || el.value || '').trim();
+      const ariaLabel = el.getAttribute('aria-label') || '';
+      
+      for (const pattern of nextButtonPatterns) {
+        if (pattern.test(text) || pattern.test(ariaLabel)) {
+          return el;
+        }
+      }
+    }
+    
+    return null;
+  }
+  
+  async function smartNavigate() {
+    currentState = STATE.SEARCHING_APPLY;
+    updateIndicator('🔍 Finding Apply...', '#8b5cf6');
+    
+    // First check if we're already on an application form
+    const formFields = findAllFields();
+    const hasForm = formFields.textFields.length > 3 || 
+                    formFields.selectFields.length > 0 || 
+                    formFields.radioGroups.size > 0;
+    
+    if (hasForm) {
+      console.log('JobFill: Already on application form');
+      return true;
+    }
+    
+    // Look for Apply button
+    const applyBtn = findApplyButton();
+    
+    if (applyBtn) {
+      console.log('JobFill: Clicking Apply button...');
+      applyBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      await new Promise(r => setTimeout(r, 500));
+      
+      smartClick(applyBtn);
+      
+      // Wait for page change or modal
+      await new Promise(r => setTimeout(r, 1500));
+      
+      // Check if we navigated to a form
+      const newFields = findAllFields();
+      if (newFields.textFields.length > 0) {
+        return true;
+      }
+      
+      // Maybe a modal opened
+      await new Promise(r => setTimeout(r, 1000));
+      return true;
+    }
+    
+    return false;
+  }
+  
+  // =====================================================
+  // ENHANCED ELEMENT DETECTION - NON-STANDARD UI
+  // =====================================================
+  
+  function findCustomYesNoButtons(container) {
+    // Look for div/span elements that act as Yes/No buttons
+    const candidates = container.querySelectorAll('div, span, label, button');
+    const buttons = { yes: null, no: null };
+    
+    for (const el of candidates) {
+      if (!isVisible(el)) continue;
+      
+      const text = (el.textContent || '').trim().toLowerCase();
+      const ariaLabel = (el.getAttribute('aria-label') || '').toLowerCase();
+      const role = el.getAttribute('role');
+      const combined = text + ' ' + ariaLabel;
+      
+      // Check if it's clickable
+      const isClickable = role === 'button' || role === 'radio' || role === 'option' ||
+                          el.onclick || el.style.cursor === 'pointer' ||
+                          el.hasAttribute('tabindex') ||
+                          el.closest('[role="radiogroup"]') ||
+                          el.classList.toString().includes('btn') ||
+                          el.classList.toString().includes('button') ||
+                          el.classList.toString().includes('option') ||
+                          el.classList.toString().includes('choice');
+      
+      if (!isClickable && el.tagName !== 'LABEL') continue;
+      
+      // Match Yes patterns
+      if (/^yes$|^y$|agree|accept|consent|authorize|confirm/.test(combined) && 
+          combined.length < 50) {
+        buttons.yes = el;
+      }
+      
+      // Match No patterns  
+      if (/^no$|^n$|decline|disagree|reject|don't|do not/.test(combined) && 
+          combined.length < 50) {
+        buttons.no = el;
+      }
+    }
+    
+    return buttons;
+  }
+  
+  function findCustomDropdown(field) {
+    // Look for custom dropdown components near an input
+    const parent = field.closest('[class*="select"], [class*="dropdown"], [class*="combobox"], [role="combobox"]');
+    if (parent) return parent;
+    
+    // Check siblings
+    let sibling = field.nextElementSibling;
+    for (let i = 0; i < 3 && sibling; i++) {
+      if (sibling.querySelector('[role="listbox"], [role="option"]') ||
+          sibling.classList.toString().includes('dropdown') ||
+          sibling.classList.toString().includes('options')) {
+        return sibling;
+      }
+      sibling = sibling.nextElementSibling;
+    }
+    
+    return null;
+  }
+  
+  async function handleCustomYesNo(container, valueToSelect) {
+    const buttons = findCustomYesNoButtons(container);
+    
+    const targetButton = valueToSelect === 'yes' ? buttons.yes : 
+                         valueToSelect === 'no' ? buttons.no : null;
+    
+    if (targetButton) {
+      await new Promise(r => setTimeout(r, 150 + Math.random() * 200));
+      targetButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      await new Promise(r => setTimeout(r, 100));
+      
+      simulateMouseMove(targetButton);
+      smartClick(targetButton);
+      
+      // Some UIs need a second click or have transitions
+      await new Promise(r => setTimeout(r, 200));
+      
+      // Check if it got selected (look for selected/active class)
+      const wasSelected = targetButton.classList.toString().includes('selected') ||
+                          targetButton.classList.toString().includes('active') ||
+                          targetButton.classList.toString().includes('checked') ||
+                          targetButton.getAttribute('aria-checked') === 'true' ||
+                          targetButton.getAttribute('aria-selected') === 'true';
+      
+      console.log(`JobFill: Custom Yes/No - clicked "${targetButton.textContent?.trim()}", selected: ${wasSelected}`);
+      return true;
+    }
+    
+    return false;
+  }
+  
+  function findAriaRadioGroups() {
+    // Find radio groups using ARIA patterns
+    const groups = [];
+    
+    // Standard radiogroup role
+    document.querySelectorAll('[role="radiogroup"]').forEach(group => {
+      if (isVisible(group)) groups.push(group);
+    });
+    
+    // Listbox that acts like radio
+    document.querySelectorAll('[role="listbox"]').forEach(group => {
+      if (isVisible(group) && !group.hasAttribute('multiple')) groups.push(group);
+    });
+    
+    // Custom button groups
+    document.querySelectorAll('[class*="button-group"], [class*="btn-group"], [class*="toggle-group"], [class*="choice-group"]').forEach(group => {
+      if (isVisible(group)) groups.push(group);
+    });
+    
+    return groups;
+  }
+  
+  async function handleAriaRadioGroup(group, valueToSelect) {
+    const options = group.querySelectorAll('[role="radio"], [role="option"], button, [class*="option"], [class*="choice"]');
+    const valueLower = valueToSelect.toLowerCase();
+    
+    for (const opt of options) {
+      if (!isVisible(opt)) continue;
+      
+      const text = (opt.textContent || '').trim().toLowerCase();
+      const ariaLabel = (opt.getAttribute('aria-label') || '').toLowerCase();
+      const value = (opt.getAttribute('data-value') || opt.getAttribute('value') || '').toLowerCase();
+      
+      let shouldSelect = false;
+      
+      // Yes matching
+      if (valueLower === 'yes' && /^yes$|^y$|agree|accept|consent|authorize/.test(text + ariaLabel)) {
+        shouldSelect = true;
+      }
+      
+      // No matching
+      if (valueLower === 'no' && /^no$|^n$|decline|disagree|reject/.test(text + ariaLabel)) {
+        shouldSelect = true;
+      }
+      
+      // Decline matching
+      if (valueLower === 'decline' && /decline|prefer not|choose not/.test(text + ariaLabel)) {
+        shouldSelect = true;
+      }
+      
+      // Direct value match
+      if (text === valueLower || value === valueLower || ariaLabel.includes(valueLower)) {
+        shouldSelect = true;
+      }
+      
+      if (shouldSelect) {
+        await new Promise(r => setTimeout(r, 100 + Math.random() * 150));
+        simulateMouseMove(opt);
+        smartClick(opt);
+        console.log(`JobFill: ARIA radio - selected "${opt.textContent?.trim()}"`);
+        return true;
+      }
+    }
+    
+    return false;
+  }
+  
+  // =====================================================
   // HUMAN-LIKE BEHAVIOR SIMULATION
   // =====================================================
   
