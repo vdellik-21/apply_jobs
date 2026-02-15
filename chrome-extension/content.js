@@ -8,6 +8,24 @@
   let fillCount = 0;
   
   // =====================================================
+  // STATE MACHINE FOR INTELLIGENT NAVIGATION
+  // =====================================================
+  
+  const STATE = {
+    IDLE: 'idle',
+    SEARCHING_APPLY: 'searching_apply',
+    FILLING_FORM: 'filling_form',
+    STUCK: 'stuck',
+    AWAITING_USER: 'awaiting_user',
+    COMPLETE: 'complete'
+  };
+  
+  let currentState = STATE.IDLE;
+  let stuckReason = '';
+  let stuckElement = null;
+  let userGuideMode = false;
+  
+  // =====================================================
   // HUMAN-LIKE BEHAVIOR SIMULATION
   // =====================================================
   
