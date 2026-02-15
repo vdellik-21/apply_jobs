@@ -1171,43 +1171,62 @@
     const radios = container.querySelectorAll('input[type="radio"]');
     const valueLower = valueToSelect.toLowerCase();
     
+    console.log(`JobFill: handleRadioButton - looking for "${valueLower}" among ${radios.length} radios`);
+    
     for (const radio of radios) {
       const label = getRadioLabel(radio).toLowerCase();
       const value = (radio.value || '').toLowerCase();
+      
+      console.log(`JobFill: Checking radio - label: "${label}", value: "${value}"`);
       
       // Check for various Yes/No patterns
       const isYesOption = /^yes$|^y$|^true$|^1$|consent|agree|accept|authorize/i.test(label) || 
                           /^yes$|^y$|^true$|^1$/i.test(value);
       const isNoOption = /^no$|^n$|^false$|^0$|decline|disagree|reject|don't|do not/i.test(label) || 
                          /^no$|^n$|^false$|^0$/i.test(value);
-      const isDeclineOption = /decline|prefer not|choose not|don't wish|do not wish/i.test(label);
+      const isDeclineOption = /decline|prefer not|choose not|don't wish|do not wish|self-identify/i.test(label);
+      
+      // Gender options
+      const isMaleOption = /^male$|^m$/i.test(label) || /^male$|^m$/i.test(value);
+      const isFemaleOption = /^female$|^f$/i.test(label) || /^female$|^f$/i.test(value);
       
       let shouldSelect = false;
       
       if (valueLower === 'yes' && isYesOption) shouldSelect = true;
       if (valueLower === 'no' && isNoOption) shouldSelect = true;
-      if (valueLower === 'decline' && (isDeclineOption || isNoOption)) shouldSelect = true;
+      if (valueLower === 'decline' && isDeclineOption) shouldSelect = true;
+      if (valueLower === 'male' && isMaleOption) shouldSelect = true;
+      if (valueLower === 'female' && isFemaleOption) shouldSelect = true;
       
       // Also check for direct value match
       if (value === valueLower || label.includes(valueLower)) shouldSelect = true;
       
+      // If we're declining and there's a "decline to self-identify" option
+      if (valueLower === 'decline' && isDeclineOption) shouldSelect = true;
+      
       if (shouldSelect) {
+        console.log(`JobFill: Selecting radio with label "${label}"`);
         await new Promise(r => setTimeout(r, 100 + Math.random() * 200));
         simulateMouseMove(radio);
         await new Promise(r => setTimeout(r, 50));
         
+        // Focus and click the radio
+        radio.focus();
         radio.checked = true;
         radio.dispatchEvent(new Event('change', { bubbles: true }));
-        radio.dispatchEvent(new Event('click', { bubbles: true }));
+        radio.dispatchEvent(new MouseEvent('click', { bubbles: true }));
         
-        // Click label too
+        // Click label too for better compatibility
         const labelEl = document.querySelector(`label[for="${radio.id}"]`) || radio.closest('label');
-        if (labelEl) smartClick(labelEl);
+        if (labelEl) {
+          smartClick(labelEl);
+        }
         
         return true;
       }
     }
     
+    console.log(`JobFill: No matching radio found for "${valueLower}"`);
     return false;
   }
   
