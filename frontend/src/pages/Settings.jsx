@@ -65,6 +65,7 @@ const typingSpeedOptions = [
 const aiProviderOptions = [
   { value: 'emergent', label: 'Emergent AI', description: 'Default - No API key needed' },
   { value: 'openai', label: 'OpenAI (GPT-4)', description: 'Requires API key' },
+  { value: 'codex', label: 'OpenAI Codex', description: 'Code-optimized model - Requires API key' },
   { value: 'claude', label: 'Claude (Anthropic)', description: 'Requires API key' },
 ];
 
