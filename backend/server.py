@@ -602,6 +602,19 @@ async def export_applications():
     
     return {"data": export_data, "count": len(export_data)}
 
+# Download extension endpoint
+@app.get("/api/extension/download")
+async def download_extension():
+    """Download the Chrome extension zip file"""
+    zip_path = "/app/chrome-extension.zip"
+    if os.path.exists(zip_path):
+        return FileResponse(
+            zip_path, 
+            media_type="application/zip",
+            filename="jobfill-chrome-extension.zip"
+        )
+    raise HTTPException(status_code=404, detail="Extension file not found")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
