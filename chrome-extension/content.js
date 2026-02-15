@@ -1306,14 +1306,39 @@
     }
     
     isProcessing = true;
+    currentState = STATE.FILLING_FORM;
     fillCount = 0;
+    let stuckFields = [];
     updateIndicator('🔄 Filling...', '#f59e0b');
     
+    // First, try smart navigation if we're not on a form yet
     const { textFields, selectFields, radioGroups, checkboxes } = findAllFields();
+    const hasStandardForm = textFields.length > 2;
+    
+    if (!hasStandardForm) {
+      console.log('JobFill: No standard form found, trying smart navigation...');
+      const navigated = await smartNavigate();
+      if (navigated) {
+        // Re-scan after navigation
+        await new Promise(r => setTimeout(r, 1000));
+        const newFields = findAllFields();
+        textFields.length = 0;
+        textFields.push(...newFields.textFields);
+        selectFields.length = 0;
+        selectFields.push(...newFields.selectFields);
+        radioGroups.clear();
+        newFields.radioGroups.forEach((v, k) => radioGroups.set(k, v));
+        checkboxes.length = 0;
+        checkboxes.push(...newFields.checkboxes);
+      }
+    }
+    
     console.log(`JobFill: Found ${textFields.length} text, ${selectFields.length} select, ${radioGroups.size} radio groups, ${checkboxes.length} checkboxes`);
     
     // Fill text fields
     for (const field of textFields) {
+      if (field.dataset?.jobfillSkipped) continue;
+      
       const value = getFieldValue(field);
       
       if (value && (!field.value || field.value.trim() === '')) {
@@ -1348,6 +1373,8 @@
     
     // Fill select dropdowns
     for (const select of selectFields) {
+      if (select.dataset?.jobfillSkipped) continue;
+      
       const value = getFieldValue(select);
       
       if (value && (!select.value || select.selectedIndex <= 0)) {
@@ -1364,9 +1391,9 @@
       }
     }
     
-    // Fill radio button groups
+    // Fill radio button groups (standard HTML)
     for (const [name, container] of radioGroups) {
-      if (!container) continue;
+      if (!container || container.dataset?.jobfillSkipped) continue;
       
       // Check if already answered
       if (container.querySelector('input[type="radio"]:checked')) continue;
@@ -1389,9 +1416,69 @@
       }
     }
     
+    // NEW: Handle ARIA-based radio groups (custom UIs)
+    const ariaGroups = findAriaRadioGroups();
+    for (const group of ariaGroups) {
+      if (group.dataset?.jobfillSkipped) continue;
+      if (group.querySelector('[aria-checked="true"], [aria-selected="true"], .selected, .active')) continue;
+      
+      const context = getFieldGroupContext(group);
+      let valueToSelect = getYesNoValue(context) || getDemographicValue(context);
+      
+      if (valueToSelect) {
+        if (settings?.random_delays) {
+          await new Promise(r => setTimeout(r, 200 + Math.random() * 400));
+        }
+        
+        if (await handleAriaRadioGroup(group, valueToSelect)) {
+          fillCount++;
+          updateIndicator(`✏️ ${fillCount} filled`, '#14b8a6');
+        } else {
+          // Try custom Yes/No buttons as fallback
+          if (await handleCustomYesNo(group, valueToSelect)) {
+            fillCount++;
+            updateIndicator(`✏️ ${fillCount} filled`, '#14b8a6');
+          } else {
+            stuckFields.push({ element: group, context, type: 'custom-radio' });
+          }
+        }
+      }
+    }
+    
+    // NEW: Find and handle custom Yes/No button groups
+    const customYesNoContainers = document.querySelectorAll(
+      '[class*="yes-no"], [class*="yesno"], [class*="choice"], [class*="toggle"], ' +
+      '[class*="question"], [class*="option-group"], fieldset'
+    );
+    
+    for (const container of customYesNoContainers) {
+      if (!isVisible(container) || container.dataset?.jobfillSkipped) continue;
+      
+      // Skip if already has selected state
+      if (container.querySelector('.selected, .active, [aria-checked="true"], input:checked')) continue;
+      
+      const context = getFieldGroupContext(container);
+      const buttons = findCustomYesNoButtons(container);
+      
+      if (buttons.yes || buttons.no) {
+        let valueToSelect = getYesNoValue(context) || getDemographicValue(context);
+        
+        if (valueToSelect) {
+          if (settings?.random_delays) {
+            await new Promise(r => setTimeout(r, 200 + Math.random() * 400));
+          }
+          
+          if (await handleCustomYesNo(container, valueToSelect)) {
+            fillCount++;
+            updateIndicator(`✏️ ${fillCount} filled`, '#14b8a6');
+          }
+        }
+      }
+    }
+    
     // Fill checkboxes (usually consent/agreement)
     for (const checkbox of checkboxes) {
-      if (checkbox.checked) continue;
+      if (checkbox.checked || checkbox.dataset?.jobfillSkipped) continue;
       
       const context = getFieldGroupContext(checkbox);
       const label = getRadioLabel(checkbox);
@@ -1413,11 +1500,28 @@
     }
     
     isProcessing = false;
-    updateIndicator(`✅ ${fillCount} filled`, '#22c55e');
     
-    setTimeout(() => {
-      updateIndicator('⚡ JobFill Ready', '#14b8a6');
-    }, 3000);
+    // Check if we got stuck on any fields
+    if (stuckFields.length > 0) {
+      const firstStuck = stuckFields[0];
+      showStuckPanel(
+        `I found a custom UI element I couldn't fill automatically. It appears to be asking about: "${firstStuck.context.substring(0, 100)}..."`,
+        firstStuck.element
+      );
+    } else if (fillCount === 0 && textFields.length === 0) {
+      // No form fields found at all - might need user guidance
+      showStuckPanel(
+        "I couldn't find any form fields on this page. Click 'Click to Guide' to show me where the form is, or if you need to click an 'Apply' button first.",
+        null
+      );
+    } else {
+      currentState = STATE.COMPLETE;
+      updateIndicator(`✅ ${fillCount} filled`, '#22c55e');
+      
+      setTimeout(() => {
+        updateIndicator('⚡ JobFill Ready', '#14b8a6');
+      }, 3000);
+    }
     
     if (settings?.save_applications && fillCount > 0) {
       logApplication();
