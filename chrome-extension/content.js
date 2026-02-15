@@ -527,9 +527,78 @@
   // ENHANCED ELEMENT DETECTION - NON-STANDARD UI
   // =====================================================
   
+  function findSegmentedYesNoControls() {
+    // Find all segmented/toggle button groups for Yes/No questions
+    const controls = [];
+    
+    // Common patterns for segmented controls
+    const containerSelectors = [
+      '[class*="segment"]',
+      '[class*="toggle"]', 
+      '[class*="switch"]',
+      '[class*="button-group"]',
+      '[class*="btn-group"]',
+      '[class*="choice"]',
+      '[class*="option"]',
+      '[class*="radio-group"]',
+      '[class*="binary"]',
+      '[role="radiogroup"]',
+      '[role="group"]',
+      'fieldset'
+    ];
+    
+    // Find containers that have exactly 2 clickable children with Yes/No text
+    document.querySelectorAll(containerSelectors.join(', ')).forEach(container => {
+      if (!isVisible(container)) return;
+      if (container.dataset?.jobfillProcessed) return;
+      
+      const clickables = container.querySelectorAll('div, span, button, label, [role="radio"], [role="option"]');
+      let yesEl = null, noEl = null;
+      
+      clickables.forEach(el => {
+        const text = (el.textContent || '').trim().toLowerCase();
+        if (text === 'yes' || text === 'y') yesEl = el;
+        if (text === 'no' || text === 'n') noEl = el;
+      });
+      
+      if (yesEl && noEl) {
+        controls.push({ container, yesEl, noEl });
+      }
+    });
+    
+    // Also find adjacent Yes/No elements without a specific container
+    const allElements = document.querySelectorAll('div, span, button');
+    let prevYes = null;
+    
+    allElements.forEach(el => {
+      if (!isVisible(el)) return;
+      const text = (el.textContent || '').trim().toLowerCase();
+      const rect = el.getBoundingClientRect();
+      
+      // Small elements that just say Yes or No
+      if (rect.width < 150 && rect.height < 80) {
+        if (text === 'yes' || text === 'y') {
+          prevYes = el;
+        } else if ((text === 'no' || text === 'n') && prevYes) {
+          // Check if they're close together (same row)
+          const prevRect = prevYes.getBoundingClientRect();
+          if (Math.abs(prevRect.top - rect.top) < 20) {
+            const container = prevYes.parentElement;
+            if (!controls.find(c => c.container === container)) {
+              controls.push({ container, yesEl: prevYes, noEl: el });
+            }
+          }
+          prevYes = null;
+        }
+      }
+    });
+    
+    return controls;
+  }
+  
   function findCustomYesNoButtons(container) {
     // Look for div/span elements that act as Yes/No buttons
-    const candidates = container.querySelectorAll('div, span, label, button');
+    const candidates = container.querySelectorAll('div, span, label, button, [role="radio"], [role="option"]');
     const buttons = { yes: null, no: null };
     
     for (const el of candidates) {
@@ -540,27 +609,25 @@
       const role = el.getAttribute('role');
       const combined = text + ' ' + ariaLabel;
       
-      // Check if it's clickable
+      // More lenient clickability check
+      const computedStyle = window.getComputedStyle(el);
       const isClickable = role === 'button' || role === 'radio' || role === 'option' ||
-                          el.onclick || el.style.cursor === 'pointer' ||
+                          el.onclick || computedStyle.cursor === 'pointer' ||
                           el.hasAttribute('tabindex') ||
                           el.closest('[role="radiogroup"]') ||
-                          el.classList.toString().includes('btn') ||
-                          el.classList.toString().includes('button') ||
-                          el.classList.toString().includes('option') ||
-                          el.classList.toString().includes('choice');
+                          el.classList.toString().match(/btn|button|option|choice|segment|toggle/i) ||
+                          el.tagName === 'BUTTON' ||
+                          (el.tagName === 'DIV' && el.children.length === 0);
       
-      if (!isClickable && el.tagName !== 'LABEL') continue;
-      
-      // Match Yes patterns
-      if (/^yes$|^y$|agree|accept|consent|authorize|confirm/.test(combined) && 
-          combined.length < 50) {
+      // Match Yes patterns - exact match for short text
+      if ((text === 'yes' || text === 'y') || 
+          (/^yes$|^y$|agree|accept|consent|authorize|confirm/i.test(combined) && combined.length < 50)) {
         buttons.yes = el;
       }
       
-      // Match No patterns  
-      if (/^no$|^n$|decline|disagree|reject|don't|do not/.test(combined) && 
-          combined.length < 50) {
+      // Match No patterns - exact match for short text
+      if ((text === 'no' || text === 'n') ||
+          (/^no$|^n$|decline|disagree|reject|don't|do not/i.test(combined) && combined.length < 50)) {
         buttons.no = el;
       }
     }
