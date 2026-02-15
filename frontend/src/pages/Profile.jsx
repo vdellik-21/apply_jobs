@@ -287,6 +287,23 @@ export default function Profile() {
     }));
   };
 
+  const addTag = () => {
+    if (newTag.trim() && !(profile.highlight_tags || []).includes(newTag.trim())) {
+      setProfile(prev => ({
+        ...prev,
+        highlight_tags: [...(prev.highlight_tags || []), newTag.trim()]
+      }));
+      setNewTag('');
+    }
+  };
+
+  const removeTag = (tagToRemove) => {
+    setProfile(prev => ({
+      ...prev,
+      highlight_tags: (prev.highlight_tags || []).filter(tag => tag !== tagToRemove)
+    }));
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
