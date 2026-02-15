@@ -389,6 +389,87 @@ export default function Settings() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* AI Provider Selection */}
+            <div className="space-y-4 p-4 rounded-xl border border-primary/30 bg-primary/5">
+              <div className="flex items-center justify-between">
+                <Label className="flex items-center gap-2 font-medium">
+                  <Key className="w-4 h-4 text-primary" />
+                  AI Provider
+                </Label>
+                <Badge variant="outline" className="bg-primary/10">{settings.ai_provider || 'emergent'}</Badge>
+              </div>
+              <Select 
+                value={settings.ai_provider || 'emergent'} 
+                onValueChange={(v) => setSettings({ ...settings, ai_provider: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {aiProviderOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{option.label}</span>
+                        <span className="text-xs text-muted-foreground">{option.description}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {/* OpenAI API Key */}
+              {settings.ai_provider === 'openai' && (
+                <div className="space-y-2 pt-2">
+                  <Label className="text-sm">OpenAI API Key</Label>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Input
+                        type={showOpenAIKey ? 'text' : 'password'}
+                        value={settings.openai_api_key || ''}
+                        onChange={(e) => setSettings({ ...settings, openai_api_key: e.target.value })}
+                        placeholder="sk-..."
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowOpenAIKey(!showOpenAIKey)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {showOpenAIKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Get your key from platform.openai.com</p>
+                </div>
+              )}
+              
+              {/* Claude API Key */}
+              {settings.ai_provider === 'claude' && (
+                <div className="space-y-2 pt-2">
+                  <Label className="text-sm">Claude API Key</Label>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Input
+                        type={showClaudeKey ? 'text' : 'password'}
+                        value={settings.claude_api_key || ''}
+                        onChange={(e) => setSettings({ ...settings, claude_api_key: e.target.value })}
+                        placeholder="sk-ant-..."
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowClaudeKey(!showClaudeKey)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {showClaudeKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Get your key from console.anthropic.com</p>
+                </div>
+              )}
+            </div>
+            
             <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-muted/20">
               <div className="space-y-0.5">
                 <Label className="font-medium">AI Field Matching</Label>
@@ -434,6 +515,28 @@ export default function Settings() {
         </Card>
       </motion.div>
 
+      {/* Application Status Info */}
+      <motion.div variants={itemVariants}>
+        <Card className="border-accent/20 bg-gradient-to-br from-accent/5 to-primary/5">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="p-2 rounded-lg bg-accent/10">
+                <RefreshCw className="w-5 h-5 text-accent" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-display font-semibold text-foreground">How Application Status Updates Work</h3>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• <strong>Auto-logged:</strong> When you use the extension to fill a form, it's logged as "Applied"</li>
+                  <li>• <strong>Manual update:</strong> Change status in Applications page via the dropdown (Applied → Interview → Offer)</li>
+                  <li>• <strong>Coming soon:</strong> Email parsing to auto-detect interview invites and rejections</li>
+                  <li>• <strong>Export:</strong> Download all your applications to Excel for tracking</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
       {/* Info Card */}
       <motion.div variants={itemVariants}>
         <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5">
@@ -450,6 +553,7 @@ export default function Settings() {
                   <li>• Avoid using "Instant" mode on LinkedIn</li>
                   <li>• The extension adds random mouse movements between fields</li>
                   <li>• Form filling is spread over time, not instant</li>
+                  <li>• Dropdowns are handled with click + scroll + select pattern</li>
                 </ul>
               </div>
             </div>
