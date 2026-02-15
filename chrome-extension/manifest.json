@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "JobFill AI - Auto Application Filler",
   "version": "1.0.0",
-  "description": "AI-powered job application auto-filler with stealth mode for LinkedIn, Indeed, Greenhouse, and more",
+  "description": "AI-powered job application auto-filler with stealth mode for LinkedIn, Indeed, Greenhouse, and 15+ platforms",
   "permissions": [
     "activeTab",
     "storage",
@@ -17,7 +17,21 @@
     "https://jobs.lever.co/*",
     "https://*.workday.com/*",
     "https://www.glassdoor.com/*",
-    "https://www.ziprecruiter.com/*"
+    "https://www.ziprecruiter.com/*",
+    "https://www.dice.com/*",
+    "https://dice.com/*",
+    "https://www.monster.com/*",
+    "https://monster.com/*",
+    "https://www.workatastartup.com/*",
+    "https://workatastartup.com/*",
+    "https://wellfound.com/*",
+    "https://www.wellfound.com/*",
+    "https://angel.co/*",
+    "https://startups.gallery/*",
+    "https://jobs.ashbyhq.com/*",
+    "https://*.ashbyhq.com/*",
+    "https://www.simplyhired.com/*",
+    "https://www.careerbuilder.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -40,7 +54,19 @@
         "https://jobs.lever.co/*",
         "https://*.workday.com/*",
         "https://www.glassdoor.com/*",
-        "https://www.ziprecruiter.com/*"
+        "https://www.ziprecruiter.com/*",
+        "https://www.dice.com/*",
+        "https://www.monster.com/*",
+        "https://www.workatastartup.com/*",
+        "https://workatastartup.com/*",
+        "https://wellfound.com/*",
+        "https://www.wellfound.com/*",
+        "https://angel.co/*",
+        "https://startups.gallery/*",
+        "https://jobs.ashbyhq.com/*",
+        "https://*.ashbyhq.com/*",
+        "https://www.simplyhired.com/*",
+        "https://www.careerbuilder.com/*"
       ],
       "js": ["content.js"],
       "css": ["content.css"]
