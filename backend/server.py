@@ -347,7 +347,15 @@ DEFAULT_SETTINGS = {
         "lever": True,
         "workday": True,
         "glassdoor": True,
-        "ziprecruiter": True
+        "ziprecruiter": True,
+        "dice": True,
+        "monster": True,
+        "ycombinator": True,
+        "wellfound": True,
+        "startupsgallery": True,
+        "ashbyhq": True,
+        "simplyhired": True,
+        "careerbuilder": True
     },
     "typing_speed": "human",
     "typing_delay_min": 50,
@@ -355,7 +363,10 @@ DEFAULT_SETTINGS = {
     "random_delays": True,
     "auto_submit": False,
     "save_applications": True,
-    "ai_matching": True
+    "ai_matching": True,
+    "ai_provider": "emergent",
+    "openai_api_key": None,
+    "claude_api_key": None
 }
 
 # API Routes
