@@ -219,6 +219,8 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [editingSkill, setEditingSkill] = useState(false);
   const [newSkill, setNewSkill] = useState('');
+  const [editingTags, setEditingTags] = useState(false);
+  const [newTag, setNewTag] = useState('');
 
   useEffect(() => {
     fetchProfile();
