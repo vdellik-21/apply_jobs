@@ -665,34 +665,45 @@ export default function Extension() {
   };
 
   const downloadExtension = () => {
-    // Create a zip-like structure info
+    // Download the actual zip file from the backend
+    const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+    window.open(`${API_URL}/api/extension/download`, '_blank');
+    toast.success('Extension download started!');
+  };
+
+  const downloadInstructions = () => {
     const instructions = `
-JobFill AI Chrome Extension
-===========================
+JobFill AI Chrome Extension - Installation Guide
+=================================================
 
-1. Create a new folder called "jobfill-extension"
-2. Create each file listed below in that folder
-3. For icons, create a subfolder called "icons" and add:
-   - icon16.png (16x16 pixels)
-   - icon48.png (48x48 pixels)  
-   - icon128.png (128x128 pixels)
-   
-   You can use any icon or generate one at https://favicon.io/
+QUICK INSTALL:
+1. Download the extension zip file using "Download Extension" button
+2. Extract the zip file to a folder
+3. Add icon images to the "icons" folder:
+   - Go to https://favicon.io/emoji-favicons/high-voltage/
+   - Download all sizes and rename to icon16.png, icon48.png, icon128.png
+4. Open Chrome and go to chrome://extensions
+5. Enable "Developer mode" (toggle in top right)
+6. Click "Load unpacked" and select the extracted folder
+7. The extension is ready to use!
 
-4. Go to chrome://extensions
-5. Enable "Developer mode"
-6. Click "Load unpacked"
-7. Select your "jobfill-extension" folder
+USAGE:
+- Navigate to any job application page (LinkedIn, Indeed, etc.)
+- Click the floating "⚡ JobFill Ready" button, OR
+- Click the extension icon in Chrome toolbar
 
-Files to create:
-- manifest.json
-- background.js
-- content.js
-- content.css
-- popup.html
-- popup.js
+DASHBOARD:
+Access your profile and settings at:
+${process.env.REACT_APP_BACKEND_URL || 'http://localhost:3000'}
 
-Copy each file's content from the "Extension Files" tab.
+SUPPORTED PLATFORMS:
+- LinkedIn Jobs
+- Indeed
+- Greenhouse
+- Lever
+- Workday
+- Glassdoor
+- ZipRecruiter
     `;
     
     const blob = new Blob([instructions], { type: 'text/plain' });
